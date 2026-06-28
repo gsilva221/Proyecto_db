@@ -1,26 +1,21 @@
 import React, { useState } from 'react';
+// Importamos tu servicio. Ajusta la ruta dependiendo de dónde guardes este componente
+import usuarioService from './services/usuarioService'; 
 
-// 1. Estructura de datos alineada exactamente con tu Backend
-interface Visita {
-  nombreVisitante: string;
-  rutVisitante: string; // Corregido para que coincida con tu BD
-  departamento: string;
-  motivo: string;       // Agregado el campo que faltaba
+interface Credenciales {
+  correo: string;
+  password: string; // Cambiado a 'password' para que coincida con tu backend
 }
 
-function App() {
-  // 2. Estado inicial con todos los campos vacíos
-  const [form, setForm] = useState<Visita>({
-    nombreVisitante: '',
-    rutVisitante: '',
-    departamento: '',
-    motivo: ''
+function Login() {
+  const [form, setForm] = useState<Credenciales>({
+    correo: '',
+    password: ''
   });
 
   const [loading, setLoading] = useState<boolean>(false);
   const [mensaje, setMensaje] = useState<string>('');
 
-  // 3. Manejador de cambios en los inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({
       ...form,
@@ -28,100 +23,57 @@ function App() {
     });
   };
 
-  // 4. Envío seguro de los datos a tu URL pública en Render
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMensaje('');
 
     try {
-      const response = await fetch('https://backend-db-48n7.onrender.com/api/visitas', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(form)
-      });
+      // Usamos tu servicio limpio que ya configuraste con Axios
+      const data = await usuarioService.login(form);
 
-      const data = await response.json();
+      setMensaje(`🟢 ¡Bienvenido, ${data.usuario.nombre}!`);
+      
+      // Aquí el backend te devolvió el usuario y su rol.
+      console.log("Rol del usuario:", data.usuario.rol);
+      
+      // TODO: Guardar los datos del usuario y redirigir a la pantalla de visitas
 
-      if (response.ok) {
-        setMensaje('🟢 ¡Visita registrada con éxito!');
-        // Reseteamos el formulario al terminar con éxito
-        setForm({ nombreVisitante: '', rutVisitante: '', departamento: '', motivo: '' });
-      } else {
-        // Muestra el mensaje de error personalizado que mande el backend si existe
-        setMensaje(`🔴 Error: ${data.mensaje || 'No se pudo guardar la visita'}`);
-      }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMensaje('🔴 Error de red o el servidor está despertando. Intenta de nuevo.');
+      // Capturamos el mensaje de error que manda tu backend (ej. "Contraseña incorrecta")
+      const mensajeError = error.response?.data?.mensaje || 'Error al conectar con el servidor';
+      setMensaje(`🔴 ${mensajeError}`);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{ 
-      maxWidth: '400px', 
-      margin: '50px auto', 
-      padding: '20px', 
-      fontFamily: 'Arial, sans-serif', 
-      border: '1px solid #444', 
-      borderRadius: '8px',
-      backgroundColor: '#1e1e24', // Fondo oscuro como tu captura
-      color: '#fff' 
-    }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Registro de Visitas 🏢</h2>
+    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', fontFamily: 'Arial, sans-serif', border: '1px solid #444', borderRadius: '8px', backgroundColor: '#1e1e24', color: '#fff' }}>
+      <h2 style={{ textAlign: 'center', marginBottom: '20px' }}>Iniciar Sesión 🔐</h2>
       
       <form onSubmit={handleSubmit}>
         <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', color: '#ccc' }}>Nombre del Visitante:</label>
+          <label style={{ display: 'block', marginBottom: '5px', color: '#ccc' }}>Correo:</label>
           <input
-            type="text"
-            name="nombreVisitante"
-            value={form.nombreVisitante}
+            type="email"
+            name="correo"
+            value={form.correo}
             onChange={handleChange}
             required
-            style={{ width: '100%', padding: '10px', boxSizing: 'border-box', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '4px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', color: '#ccc' }}>RUT:</label>
-          <input
-            type="text"
-            name="rutVisitante" // Corregido: 'rutVisitante'
-            value={form.rutVisitante}
-            onChange={handleChange}
-            required
-            placeholder="19.123.456-7"
-            style={{ width: '100%', padding: '10px', boxSizing: 'border-box', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '4px' }}
-          />
-        </div>
-
-        <div style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', color: '#ccc' }}>Departamento:</label>
-          <input
-            type="text"
-            name="departamento"
-            value={form.departamento}
-            onChange={handleChange}
-            required
-            placeholder="Ej: 402"
             style={{ width: '100%', padding: '10px', boxSizing: 'border-box', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '4px' }}
           />
         </div>
 
         <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '5px', color: '#ccc' }}>Motivo:</label>
+          <label style={{ display: 'block', marginBottom: '5px', color: '#ccc' }}>Contraseña:</label>
           <input
-            type="text"
-            name="motivo" // Agregado para que viaje al backend
-            value={form.motivo}
+            type="password"
+            name="password"
+            value={form.password}
             onChange={handleChange}
             required
-            placeholder="Ej: Delivery de comida o mudanza"
             style={{ width: '100%', padding: '10px', boxSizing: 'border-box', backgroundColor: '#333', color: '#fff', border: '1px solid #555', borderRadius: '4px' }}
           />
         </div>
@@ -129,19 +81,9 @@ function App() {
         <button 
           type="submit" 
           disabled={loading}
-          style={{ 
-            width: '100%', 
-            padding: '12px', 
-            backgroundColor: '#007BFF', 
-            color: 'white', 
-            border: 'none', 
-            borderRadius: '4px', 
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: 'bold'
-          }}
+          style={{ width: '100%', padding: '12px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}
         >
-          {loading ? 'Guardando...' : 'Registrar Visita'}
+          {loading ? 'Ingresando...' : 'Entrar'}
         </button>
       </form>
 
@@ -150,4 +92,4 @@ function App() {
   );
 }
 
-export default App;
+export default Login;
