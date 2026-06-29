@@ -1,5 +1,16 @@
 import axios from "axios";
 
-export default axios.create({
+const api = axios.create({
     baseURL: "https://backend-db-48n7.onrender.com/api"
 });
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem("token");
+    if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+});
+
+export default api;
+ 
