@@ -1,5 +1,7 @@
 ﻿import React, { useEffect, useMemo, useState } from 'react';
 import './App.css';
+import Login from './components/Login';
+import Register from './components/Register';
 
 type MenuKey =
   | 'Dashboard'
@@ -129,11 +131,9 @@ const statistics = [
 ];
 
 function App() {
-  const [username, setUsername] = useState('Gabriel Silva');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const [status, setStatus] = useState<'idle' | 'error' | 'success' | 'loading'>('idle');
+  const [username, setUsername] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [selectedMenu, setSelectedMenu] = useState<MenuKey>('Dashboard');
   const [currentTime, setCurrentTime] = useState(new Date());
   const [tenantSearch, setTenantSearch] = useState('');
@@ -149,11 +149,10 @@ function App() {
   const [tenantAssign, setTenantAssign] = useState({ nombre: '', departamento: '' });
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
     setIsAuthenticated(false);
     setUsername('');
-    setPassword('');
-    setMessage('');
-    setStatus('idle');
     setSelectedMenu('Dashboard');
   };
 
@@ -181,23 +180,14 @@ function App() {
     [tenantSearch, tenants]
   );
 
-  const handleLoginSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleLoginSuccess = (usuario: { nombre?: string; correo?: string; rol?: string }) => {
+    setUsername(usuario?.nombre || usuario?.correo || 'Usuario');
+    setIsAuthenticated(true);
+  };
 
-    if (!username.trim() || !password.trim()) {
-      setMessage('Por favor completa ambos campos.');
-      setStatus('error');
-      return;
-    }
-
-    setStatus('loading');
-    setMessage('');
-
-    window.setTimeout(() => {
-      setIsAuthenticated(true);
-      setStatus('success');
-      setMessage('');
-    }, 800);
+  const handleRegisterSuccess = (usuario: { nombre?: string; correo?: string; rol?: string }) => {
+    setUsername(usuario?.nombre || usuario?.correo || 'Usuario');
+    setAuthMode('login');
   };
 
   const handleDeleteTenant = (id: number) => {
@@ -776,55 +766,28 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    const storedUsuario = localStorage.getItem('usuario');
+    const storedToken = localStorage.getItem('token');
+
+    if (storedToken && storedUsuario) {
+      const usuario = JSON.parse(storedUsuario);
+      setUsername(usuario?.nombre || usuario?.correo || 'Usuario');
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   if (!isAuthenticated) {
-    return (
-      <div className="page-shell">
-        <section className="login-card animate-fade-in">
-          <div className="brand">
-            <div className="brand-mark">CM</div>
-            <div>
-              <h1>CondoManage</h1>
-              <p>Gestión de condominios y servicios profesionales</p>
-            </div>
-          </div>
-
-          <form className="login-form" onSubmit={handleLoginSubmit} noValidate>
-            <div className="form-group">
-              <label htmlFor="username">Usuario</label>
-              <input
-                id="username"
-                name="username"
-                type="text"
-                autoComplete="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                placeholder="Ingresa tu usuario"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">Contraseña</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="Ingresa tu contraseña"
-              />
-            </div>
-
-            <button type="submit" className="primary-button" disabled={status === 'loading'}>
-              {status === 'loading' ? 'Ingresando...' : 'Iniciar sesión'}
-            </button>
-
-            <p className={`form-message ${status === 'error' ? 'error' : status === 'success' ? 'success' : ''}`}>
-              {message}
-            </p>
-          </form>
-        </section>
-      </div>
+    return authMode === 'login' ? (
+      <Login
+        onLoginSuccess={handleLoginSuccess}
+        onSwitchToRegister={() => setAuthMode('register')}
+      />
+    ) : (
+      <Register
+        onRegisterSuccess={handleRegisterSuccess}
+        onSwitchToLogin={() => setAuthMode('login')}
+      />
     );
   }
 
