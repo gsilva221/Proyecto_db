@@ -25,14 +25,7 @@ const RegistroVisitas: React.FC = () => {
 
   const getVisitaId = (visita: Visita) => visita._id || visita.id || '';
 
-  const cargarVisitas = async () => {
-    try {
-      const data = await visitaService.getVisitas();
-      setVisitas(Array.isArray(data) ? data : []);
-    } catch (error: any) {
-      setMensaje({ tipo: 'error', texto: error?.response?.data?.mensaje || 'No se pudo cargar visitas' });
-    }
-  };
+
 
   // Manual loader with explicit console logs for debugging
   const handleCargarVisitas = async () => {
@@ -61,11 +54,7 @@ const RegistroVisitas: React.FC = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const startEdit = (visita: Visita) => {
-    setEditingId(getVisitaId(visita) || null);
-    setForm({ nombre: visita.nombre || '', rut: visita.rut || '', departamento: visita.departamento || '', motivo: visita.motivo || '' });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+
 
   const cancelEdit = () => {
     setEditingId(null);
