@@ -25,28 +25,18 @@ const RegistroVisitas: React.FC = () => {
 
   const getVisitaId = (visita: Visita) => visita._id || visita.id || '';
 
-
-
-  // Manual loader with explicit console logs for debugging
-  const handleCargarVisitas = async () => {
+  const cargarVisitas = async () => {
     try {
       const data = await visitaService.getVisitas();
-      console.log('Respuesta del backend:', data);
       setVisitas(Array.isArray(data) ? data : []);
     } catch (error: any) {
-      console.error('Error al cargar:', error);
-      const status = error?.response?.status;
-      if (status === 401) {
-        setMensaje({ tipo: 'error', texto: 'No autenticado. Por favor inicia sesión para cargar visitas.' });
-      } else {
-        setMensaje({ tipo: 'error', texto: error?.response?.data?.mensaje || 'No se pudo cargar visitas' });
-      }
+      console.error('Error al cargar visitas:', error);
+      setMensaje({ tipo: 'error', texto: error?.response?.data?.mensaje || 'No se pudo cargar visitas' });
     }
   };
 
-  // NOTE: automatic loading disabled to allow manual debug via button
   useEffect(() => {
-    // Manual loading available via the "Cargar Visitas Registradas" button
+    cargarVisitas();
   }, []);
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -225,11 +215,6 @@ const RegistroVisitas: React.FC = () => {
         <h3 style={{ margin: '0 0 8px' }}>Últimas visitas registradas</h3>
         <p style={{ margin: '0 0 16px', color: '#b8bcc8' }}>Visitas activas y registradas recientemente.</p>
 
-        <div style={{ marginBottom: 12 }}>
-          <button onClick={async () => await handleCargarVisitas()} style={{ ...buttonStyle, width: 260 }}>
-            Cargar Visitas Registradas
-          </button>
-        </div>
 
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -247,7 +232,7 @@ const RegistroVisitas: React.FC = () => {
               {visitas.length === 0 ? (
                 <tr>
                   <td style={{ ...tdStyle, padding: 20, color: '#b8bcc8' }} colSpan={6}>
-                    No hay visitas registradas. Presiona "Cargar Visitas Registradas" o inicia sesión si es necesario.
+                    No hay visitas registradas aún.
                   </td>
                 </tr>
               ) : (
