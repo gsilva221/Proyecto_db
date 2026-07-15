@@ -12,7 +12,7 @@ type Novedad = {
 
 const AdminNovedades: React.FC = () => {
   const [novedades, setNovedades] = useState<Novedad[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ titulo: '', descripcion: '' });
 

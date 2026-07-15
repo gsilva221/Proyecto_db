@@ -19,12 +19,7 @@ const menuItems: { key: MenuKey; label: string; icon: string }[] = [
   { key: 'Novedades', label: 'Novedades', icon: 'fa-exclamation-triangle' },
 ];
 
-const dashboardStats = [
-  { label: 'Personas dentro', value: '24', icon: 'fa-person', color: '#2563eb' },
-  { label: 'Guardias en turno', value: '5', icon: 'fa-user-shield', color: '#1d4ed8' },
-  { label: 'Visitas del día', value: '14', icon: 'fa-user-check', color: '#7c3aed' },
-  { label: 'Novedades registradas', value: '6', icon: 'fa-exclamation-triangle', color: '#ef4444' },
-];
+// dashboardStats removed — values are computed dynamically
 
 function App() {
   const [username, setUsername] = useState('');
