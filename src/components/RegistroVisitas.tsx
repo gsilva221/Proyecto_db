@@ -96,8 +96,30 @@ const RegistroVisitas: React.FC = () => {
   };
 
   const handleMarcarSalida = async (id?: string) => {
-    if (!id) return;
-    console.log('Acción Registrar Salida en visita:', id);
+    console.log('handleMarcarSalida called with id:', id);
+    if (!id) {
+      console.warn('No id provided to handleMarcarSalida');
+      return;
+    }
+    setLoading(true);
+    setMensaje(null);
+    try {
+      const updated = await visitaService.registrarSalida(id);
+      console.log('registrarSalida response:', updated);
+      setVisitas((prev) => prev.map((v) => (getVisitaId(v) === id ? { ...v, ...updated } : v)));
+      setMensaje({ tipo: 'success', texto: 'Salida registrada correctamente' });
+    } catch (error: any) {
+      console.error('Error al registrar salida:', error);
+      if (error?.response?.status === 401) {
+        setMensaje({ tipo: 'error', texto: 'No autorizado. Inicia sesión nuevamente.' });
+      } else if (error?.response?.data?.mensaje) {
+        setMensaje({ tipo: 'error', texto: error.response.data.mensaje });
+      } else {
+        setMensaje({ tipo: 'error', texto: 'Error al registrar salida' });
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleDelete = async (id?: string) => {
