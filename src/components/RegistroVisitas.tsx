@@ -155,8 +155,8 @@ const RegistroVisitas: React.FC = () => {
     setEditFormData({ nombre: '', rut: '', departamento: '', motivo: '' });
   };
 
-  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
     setEditFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -284,7 +284,12 @@ const RegistroVisitas: React.FC = () => {
                           <input name="rut" value={editFormData.rut} onChange={handleEditInputChange} style={inputStyle} />
                         </td>
                         <td style={{ ...tdStyle }}>
-                          <input name="departamento" value={editFormData.departamento} onChange={handleEditInputChange} style={inputStyle} />
+                          <select name="departamento" value={editFormData.departamento} onChange={handleEditInputChange} style={{ ...inputStyle, height: 40 }}>
+                            <option value="">Selecciona departamento</option>
+                            {departamentosLista.map((d) => (
+                              <option key={d._id || d.numero} value={d.numero}>{`${d.numero} (Piso ${d.piso})`}</option>
+                            ))}
+                          </select>
                         </td>
                         <td style={{ ...tdStyle }}>
                           <input name="motivo" value={editFormData.motivo} onChange={handleEditInputChange} style={inputStyle} />

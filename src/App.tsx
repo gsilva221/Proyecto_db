@@ -4,8 +4,9 @@ import Login from './components/Login';
 import Register from './components/Register';
 import RegistroVisitas from './components/RegistroVisitas';
 import AdminDepartamentos from './components/AdminDepartamentos';
+import AdminGuardias from './components/AdminGuardias';
 
-type MenuKey = 'Dashboard' | 'Registro de Visitas' | 'Departamentos';
+type MenuKey = 'Dashboard' | 'Registro de Visitas' | 'Departamentos' | 'Guardias';
 
 const menuItems: { key: MenuKey; label: string; icon: string }[] = [
   { key: 'Dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
@@ -125,6 +126,9 @@ function App() {
       case 'Departamentos':
         return <AdminDepartamentos />;
 
+      case 'Guardias':
+        return <AdminGuardias />;
+
       default:
         return null;
     }
@@ -195,13 +199,23 @@ function App() {
               </button>
             ))}
             {userRole === 'administrador' && (
-              <button
-                className={`menu-item ${selectedMenu === 'Departamentos' ? 'active' : ''}`}
-                onClick={() => setSelectedMenu('Departamentos')}
-              >
-                <span className="menu-icon"><i className={`fa-solid fa-building`}></i></span>
-                Departamentos
-              </button>
+              <>
+                <button
+                  className={`menu-item ${selectedMenu === 'Departamentos' ? 'active' : ''}`}
+                  onClick={() => setSelectedMenu('Departamentos')}
+                >
+                  <span className="menu-icon"><i className={`fa-solid fa-building`}></i></span>
+                  Departamentos
+                </button>
+
+                <button
+                  className={`menu-item ${selectedMenu === 'Guardias' ? 'active' : ''}`}
+                  onClick={() => setSelectedMenu('Guardias')}
+                >
+                  <span className="menu-icon"><i className={`fa-solid fa-user-shield`}></i></span>
+                  Guardias
+                </button>
+              </>
             )}
           </nav>
         </aside>
