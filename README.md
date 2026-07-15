@@ -256,7 +256,7 @@ El trabajo de manera colaborativa fue respaldado mediante un sistema GitHub con 
 
 - **URL Pública de la API REST (Backend - Render):**
   ```
-  https://backend-db-48n7.onrender.com/api
+  https://backend-db-48n7.onrender.com
   ```
 
 - **Repositorio Público de GitHub:**
