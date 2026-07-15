@@ -1,23 +1,25 @@
-import api from "./api";
+import api from './api';
 
-const auditoriaService = {
-    // Obtener todos los registros
-    obtenerAuditorias: async () => {
-        const response = await api.get("/auditoria");
-        return response.data;
-    },
+const departamentoService = {
+  obtenerDepartamentos: async () => {
+    const response = await api.get('/departamentos');
+    return response.data;
+  },
 
-    // Crear un nuevo registro
-    crearAuditoria: async (datos) => {
-        const response = await api.post("/auditoria", datos);
-        return response.data;
-    },
+  crearDepartamento: async (departamento) => {
+    const response = await api.post('/departamentos', departamento);
+    return response.data;
+  },
 
-    // Buscar por fecha
-    buscarPorFecha: async (fecha) => {
-        const response = await api.get(`/auditoria/fecha/${fecha}`);
-        return response.data;
-    }
+  actualizarDepartamento: async (id, departamento) => {
+    const response = await api.put(`/departamentos/${id}`, departamento);
+    return response.data;
+  },
+
+  eliminarDepartamento: async (id) => {
+    const response = await api.delete(`/departamentos/${id}`);
+    return response.data;
+  }
 };
 
-export default auditoriaService;
+export default departamentoService;

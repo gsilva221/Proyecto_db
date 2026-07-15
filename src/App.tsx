@@ -3,8 +3,9 @@ import './App.css';
 import Login from './components/Login';
 import Register from './components/Register';
 import RegistroVisitas from './components/RegistroVisitas';
+import AdminDepartamentos from './components/AdminDepartamentos';
 
-type MenuKey = 'Dashboard' | 'Registro de Visitas';
+type MenuKey = 'Dashboard' | 'Registro de Visitas' | 'Departamentos';
 
 const menuItems: { key: MenuKey; label: string; icon: string }[] = [
   { key: 'Dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
@@ -23,6 +24,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [selectedMenu, setSelectedMenu] = useState<MenuKey>('Dashboard');
+  const [userRole, setUserRole] = useState<string>('');
   const [currentTime, setCurrentTime] = useState(new Date());
 
   const handleLogout = () => {
@@ -48,6 +50,7 @@ function App() {
     if (storedToken && storedUsuario) {
       const usuario = JSON.parse(storedUsuario);
       setUsername(usuario?.nombre || usuario?.correo || 'Usuario');
+      setUserRole(usuario?.rol || usuario?.role || '');
       setIsAuthenticated(true);
     }
   }, []);
@@ -59,10 +62,11 @@ function App() {
     day: 'numeric',
   });
   const formattedTime = currentTime.toLocaleTimeString('es-CL');
-  const userRole = 'Administrador';
+  
 
   const handleLoginSuccess = (usuario: { nombre?: string; correo?: string; rol?: string }) => {
     setUsername(usuario?.nombre || usuario?.correo || 'Usuario');
+    setUserRole(usuario?.rol || '');
     setIsAuthenticated(true);
   };
 
@@ -117,6 +121,9 @@ function App() {
 
       case 'Registro de Visitas':
         return <RegistroVisitas />;
+
+      case 'Departamentos':
+        return <AdminDepartamentos />;
 
       default:
         return null;
@@ -187,6 +194,15 @@ function App() {
                 {item.label}
               </button>
             ))}
+            {userRole === 'administrador' && (
+              <button
+                className={`menu-item ${selectedMenu === 'Departamentos' ? 'active' : ''}`}
+                onClick={() => setSelectedMenu('Departamentos')}
+              >
+                <span className="menu-icon"><i className={`fa-solid fa-building`}></i></span>
+                Departamentos
+              </button>
+            )}
           </nav>
         </aside>
 

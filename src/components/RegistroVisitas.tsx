@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import visitaService from '../services/visitaService';
+import departamentoService from '../services/departamentoService';
 
 type Visita = {
   id?: string;
@@ -19,6 +20,7 @@ const RegistroVisitas: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState<{ tipo: 'error' | 'success'; texto: string } | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [departamentosLista, setDepartamentosLista] = useState<{ _id?: string; numero: string; piso: number }[]>([]);
   // Inline editing states
   const [editRowId, setEditRowId] = useState<string | null>(null);
   const [editFormData, setEditFormData] = useState({ nombre: '', rut: '', departamento: '', motivo: '' });
@@ -37,10 +39,20 @@ const RegistroVisitas: React.FC = () => {
 
   useEffect(() => {
     cargarVisitas();
+    cargarDepartamentos();
   }, []);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
+  const cargarDepartamentos = async () => {
+    try {
+      const data = await departamentoService.obtenerDepartamentos();
+      setDepartamentosLista(Array.isArray(data) ? data : []);
+    } catch (error: any) {
+      console.error('Error al cargar departamentos:', error);
+    }
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = event.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -174,14 +186,12 @@ const RegistroVisitas: React.FC = () => {
             placeholder="RUT/DNI"
             style={inputStyle}
           />
-          <input
-            name="departamento"
-            value={form.departamento}
-            onChange={handleChange}
-            required
-            placeholder="Departamento a visitar"
-            style={inputStyle}
-          />
+          <select name="departamento" value={form.departamento} onChange={handleChange} required style={{ ...inputStyle, height: 40 }}>
+            <option value="">Selecciona departamento</option>
+            {departamentosLista.map((d) => (
+              <option key={d._id} value={d.numero}>{`${d.numero} (Piso ${d.piso})`}</option>
+            ))}
+          </select>
           <textarea
             name="motivo"
             value={form.motivo}
