@@ -45,7 +45,7 @@ const AdminGuardias: React.FC = () => {
     setMensaje(null);
     try {
       const payload = { nombre: form.nombre.trim(), rut: form.rut.trim(), telefono: form.telefono.trim() };
-      const created = await guardiaService.crearGuardia(payload as any);
+      await guardiaService.crearGuardia(payload as any);
       setForm({ nombre: '', rut: '', telefono: '' });
       await cargar();
       setMensaje({ tipo: 'success', texto: 'Guardia registrado' });
