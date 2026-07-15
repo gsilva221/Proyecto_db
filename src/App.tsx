@@ -5,12 +5,18 @@ import Register from './components/Register';
 import RegistroVisitas from './components/RegistroVisitas';
 import AdminDepartamentos from './components/AdminDepartamentos';
 import AdminGuardias from './components/AdminGuardias';
+import AdminNovedades from './components/AdminNovedades';
+import novedadService from './services/novedadService';
+import NewNovedad from './components/NewNovedad';
+import visitaService from './services/visitaService';
+import guardiaService from './services/guardiaService';
 
-type MenuKey = 'Dashboard' | 'Registro de Visitas' | 'Departamentos' | 'Guardias';
+type MenuKey = 'Dashboard' | 'Registro de Visitas' | 'Departamentos' | 'Guardias' | 'Novedades';
 
 const menuItems: { key: MenuKey; label: string; icon: string }[] = [
   { key: 'Dashboard', label: 'Dashboard', icon: 'fa-gauge-high' },
   { key: 'Registro de Visitas', label: 'Visitas', icon: 'fa-user-check' },
+  { key: 'Novedades', label: 'Novedades', icon: 'fa-exclamation-triangle' },
 ];
 
 const dashboardStats = [
@@ -27,6 +33,9 @@ function App() {
   const [selectedMenu, setSelectedMenu] = useState<MenuKey>('Dashboard');
   const [userRole, setUserRole] = useState<string>('');
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [novedades, setNovedades] = useState<any[]>([]);
+  const [visitas, setVisitas] = useState<any[]>([]);
+  const [guardias, setGuardias] = useState<any[]>([]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -54,6 +63,27 @@ function App() {
       setUserRole(usuario?.rol || usuario?.role || '');
       setIsAuthenticated(true);
     }
+
+    // load novedades for dashboard
+    (async () => {
+      try {
+        const data = await novedadService.obtenerNovedades();
+        setNovedades(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error loading novedades', err);
+      }
+    })();
+
+    // load visitas and guardias
+    (async () => {
+      try {
+        const [vData, gData] = await Promise.all([visitaService.getVisitas(), guardiaService.obtenerGuardias()]);
+        setVisitas(Array.isArray(vData) ? vData : []);
+        setGuardias(Array.isArray(gData) ? gData : []);
+      } catch (err) {
+        console.error('Error loading visitas/guardias', err);
+      }
+    })();
   }, []);
 
   const formattedDate = currentTime.toLocaleDateString('es-CL', {
@@ -76,13 +106,29 @@ function App() {
     setAuthMode('login');
   };
 
+  const isSameDay = (dateLike?: string | number | Date) => {
+    if (!dateLike) return false;
+    const d = new Date(dateLike);
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+  };
+
+  const personasDentro = visitas.filter(v => !v.salida).length;
+  const guardiasEnTurno = guardias.filter(g => !!g.activo).length;
+  const visitasDelDia = visitas.filter(v => isSameDay(v.entrada || v.createdAt)).length;
+
   const renderContent = () => {
     switch (selectedMenu) {
       case 'Dashboard':
         return (
           <>
             <div className="dashboard-grid">
-              {dashboardStats.map((stat) => (
+              {[
+                { label: 'Personas dentro', value: String(personasDentro), icon: 'fa-person', color: '#2563eb' },
+                { label: 'Guardias en turno', value: String(guardiasEnTurno), icon: 'fa-user-shield', color: '#1d4ed8' },
+                { label: 'Visitas del día', value: String(visitasDelDia), icon: 'fa-user-check', color: '#7c3aed' },
+                { label: 'Novedades registradas', value: String(novedades.length), icon: 'fa-exclamation-triangle', color: '#ef4444' },
+              ].map((stat) => (
                 <article className="dashboard-card" key={stat.label} style={{ borderTopColor: stat.color }}>
                   <div className="dashboard-card-icon" style={{ background: `${stat.color}1f` }}>
                     <i className={`fa-solid ${stat.icon}`}></i>
@@ -101,11 +147,11 @@ function App() {
               <div className="panel-grid">
                 <div className="panel-stat">
                   <span>Visitas activas</span>
-                  <strong>3</strong>
+                  <strong>{personasDentro}</strong>
                 </div>
                 <div className="panel-stat">
                   <span>Guardias en turno</span>
-                  <strong>5</strong>
+                  <strong>{guardiasEnTurno}</strong>
                 </div>
                 <div className="panel-stat">
                   <span>Paquetes pendientes</span>
@@ -113,15 +159,22 @@ function App() {
                 </div>
                 <div className="panel-stat">
                   <span>Novedades recientes</span>
-                  <strong>6</strong>
+                  <strong>{novedades.filter(n => (n.estado || '').toLowerCase() === 'pendiente').length}</strong>
                 </div>
               </div>
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+              <NewNovedad onCreated={(n) => setNovedades((prev) => [n, ...prev])} />
             </div>
           </>
         );
 
       case 'Registro de Visitas':
         return <RegistroVisitas />;
+
+      case 'Novedades':
+        return <AdminNovedades />;
 
       case 'Departamentos':
         return <AdminDepartamentos />;
