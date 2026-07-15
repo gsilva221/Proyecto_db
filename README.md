@@ -251,15 +251,16 @@ El trabajo de manera colaborativa fue respaldado mediante un sistema GitHub con 
 
 - **URL Pública de la Aplicación (Frontend - Vercel):**
   ```
-  https://como-manage-frontend.vercel.app/
+  https://proyecto-db-peach.vercel.app
   ```
 
 - **URL Pública de la API REST (Backend - Render):**
   ```
-  https://backend-de-tu-proyecto.onrender.com/api
+  https://backend-db-48n7.onrender.com/api
   ```
 
 - **Repositorio Público de GitHub:**
   ```
   https://github.com/gsilva221/Proyecto_DB
+  https://github.com/gsilva221/backend_db
   ```
